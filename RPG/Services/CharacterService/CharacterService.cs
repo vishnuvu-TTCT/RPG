@@ -1,4 +1,5 @@
 ﻿global using AutoMapper;
+using RPG.Data;
 using RPG.Dtos.Character;
 using RPG.Models;
 
@@ -6,17 +7,20 @@ namespace RPG.Services.CharacterService
 {
     public class CharacterService : ICharacterService
     {
+
+        private readonly DataContext _context;
+        private readonly IMapper _mapper;
+
+        public CharacterService(IMapper mapper, DataContext context)
+        {
+            _mapper = mapper;
+            _context = context;
+        }
         private static List<Character> characters = new List<Character>
         {
             new Character(),
             new Character{Name = "Sam",}
         };
-        private readonly IMapper _mapper;
-
-        public CharacterService(IMapper mapper)
-        {
-            _mapper = mapper;
-        }
         public async Task<ServiceResponse<List<GetCharacterDto>>> AddCharacter(AddCharacterDto Newcharacter)
         {
             var serviceResponse = new ServiceResponse<List<GetCharacterDto>>();
@@ -53,7 +57,8 @@ namespace RPG.Services.CharacterService
         public async Task<ServiceResponse<List<GetCharacterDto>>> GetAllCharacter()
         {
             var serviceResponse = new ServiceResponse<List<GetCharacterDto>>();
-            serviceResponse.Data = characters.Select(c => _mapper.Map<GetCharacterDto>(c)).ToList();
+            var dbCharacter = await _context.Characters.ToListAsync();
+            serviceResponse.Data = dbCharacter.Select(c => _mapper.Map<GetCharacterDto>(c)).ToList();
             return serviceResponse;
         }
 
