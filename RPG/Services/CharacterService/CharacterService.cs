@@ -40,7 +40,7 @@ namespace RPG.Services.CharacterService
                 }
                 _context.Characters.Remove(character); 
                 serviceResponse.Data =await _context.Characters.Select(c => _mapper.Map<GetCharacterDto>(c)).ToListAsync();
-                _context.SaveChangesAsync();
+               await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -53,10 +53,22 @@ namespace RPG.Services.CharacterService
 
         public async Task<ServiceResponse<List<GetCharacterDto>>> GetAllCharacter()
         {
-            var serviceResponse = new ServiceResponse<List<GetCharacterDto>>();
-            var dbCharacter = await _context.Characters.ToListAsync();
-            serviceResponse.Data = dbCharacter.Select(c => _mapper.Map<GetCharacterDto>(c)).ToList();
-            return serviceResponse;
+            try
+            {
+                var serviceResponse = new ServiceResponse<List<GetCharacterDto>>();
+                var dbCharacter = await _context.Characters.ToListAsync();
+                serviceResponse.Data = dbCharacter.Select(c => _mapper.Map<GetCharacterDto>(c)).ToList();
+                return serviceResponse;
+
+            }
+            catch (Exception ex)
+            {
+                Console.Write("exception is " + ex);
+                var serviceResponse = new ServiceResponse<List<GetCharacterDto>>();
+                return serviceResponse;
+            }
+
+
         }
 
         public async Task<ServiceResponse<GetCharacterDto>> GetCharacterById(int id)
