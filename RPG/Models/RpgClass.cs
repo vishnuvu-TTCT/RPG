@@ -5,8 +5,10 @@ namespace RPG.Models
 	[JsonConverter(typeof(JsonStringEnumConverter))]
 	public enum RpgClass
 	{
-		Knight =1,
-		Mage =2,
-		Cleric =3
+		Duelist =1,
+		Initiator =2,
+		Controller =3,
+		Sentinal=4
+
 	}
 }

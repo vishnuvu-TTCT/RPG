@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using RPG.Dtos.Character;
 using RPG.Models;
+using System.Security.Claims;
 
 namespace RPG.Controllers
 {
