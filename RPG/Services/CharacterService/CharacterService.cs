@@ -37,7 +37,7 @@ namespace RPG.Services.CharacterService
             try
             {
                 var character = await _context.Characters.FirstOrDefaultAsync(c => c.Id == id && c.User.Id == GetUserId());
-                if (character is null || character.User.Id != GetUserId())
+                if (character is null || character.User!.Id != GetUserId())
                 {
                     throw new Exception($"Character with ID '{id}' not found");
                 }
@@ -61,7 +61,10 @@ namespace RPG.Services.CharacterService
             try
             {
                 var serviceResponse = new ServiceResponse<List<GetCharacterDto>>();
-                var dbCharacter = await _context.Characters.Where(c => c.User!.Id == GetUserId()).ToListAsync();
+                var dbCharacter = await _context.Characters
+                    .Include(c => c.Weapon)
+                    .Include(c => c.Skills)
+                    .Where(c => c.User!.Id == GetUserId()).ToListAsync();
                 serviceResponse.Data = dbCharacter.Select(c => _mapper.Map<GetCharacterDto>(c)).ToList();
                 return serviceResponse;
 
@@ -80,7 +83,9 @@ namespace RPG.Services.CharacterService
         {
             var serviceResponse = new ServiceResponse<GetCharacterDto>();
             var dbCharacter = await _context.Characters
-                .FirstOrDefaultAsync(c => c.Id == id && c.User.Id == GetUserId());
+                .Include(c => c.Weapon)
+                .Include(c => c.Skills)
+                .FirstOrDefaultAsync(c => c.Id == id && c.User!.Id == GetUserId());
             serviceResponse.Data = _mapper.Map<GetCharacterDto>(dbCharacter);
             return serviceResponse;
         }
@@ -94,7 +99,7 @@ namespace RPG.Services.CharacterService
                 var dbCharacter = await _context.Characters
                     .Include(c=> c.User)
                     .FirstOrDefaultAsync(c => c.Id == updatedCharacter.Id);
-                if(dbCharacter is null || dbCharacter.User.Id != GetUserId())
+                if(dbCharacter is null || dbCharacter.User!.Id != GetUserId())
                 {
                     throw new Exception($"Character with ID '{updatedCharacter.Id}' not found");
                 }
@@ -111,5 +116,42 @@ namespace RPG.Services.CharacterService
             return serviceResponse ;
         }
 
+        public async Task<ServiceResponse<GetCharacterDto>> AddCharacterSkill(AddCharacterSkillDto newCharacterSkill)
+        {
+            var response = new ServiceResponse<GetCharacterDto>();
+            try
+            {
+                var character = await _context.Characters
+                    .Include(c => c.Weapon)
+                    .Include(c => c.Skills)
+                    .FirstOrDefaultAsync(c => c.Id == newCharacterSkill.ChracterId && c.User!.Id == GetUserId());
+
+                if (character is null)
+                {
+                    response.Success = false;
+                    response.Message = "Character not found";
+                    return response;
+                }
+
+                var skill = await _context.Skills.FirstOrDefaultAsync(s => s.Id == newCharacterSkill.SkillId);
+
+
+                if (skill is null)
+                {
+                    response.Success = false;
+                    response.Message = "Skill not found";
+                    return response;
+                }
+                character.Skills!.Add(skill);
+                await _context.SaveChangesAsync();
+                response.Data = _mapper.Map<GetCharacterDto>(character);
+            }
+            catch(Exception ex)
+            {
+                response.Success = false;
+                response.Message= ex.Message;
+            }
+            return response;
+        }
     }
 }

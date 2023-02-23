@@ -1,4 +1,5 @@
-﻿using RPG.Models;
+﻿using RPG.Dtos.Weapon;
+using RPG.Models;
 
 namespace RPG.Dtos.Character
 {
@@ -14,6 +15,10 @@ namespace RPG.Dtos.Character
         public int Intelligence { get; set; } = 10;
 
         public RpgClass Class { get; set; } = RpgClass.Duelist;
+
+        public GetWeaponDto? Weapon { get; set; }
+
+        public List<GetSkillDto>? Skils { get; set; }
 
     }
 }
